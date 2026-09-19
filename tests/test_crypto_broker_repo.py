@@ -47,7 +47,12 @@ def test_broker_view_never_leaks_secrets(session, box):
 def test_webhook_secret_created_once_then_rotated(session, box):
     first = get_webhook_secret(session, box)
     assert first == get_webhook_secret(session, box)
-    assert rotate_webhook_secret(session, box) != first
+    assert first.startswith("mtf_")
+    import re
+    assert re.match(r"^mtf_[0-9a-f]{32}$", first)
+    rotated = rotate_webhook_secret(session, box)
+    assert rotated != first
+    assert re.match(r"^mtf_[0-9a-f]{32}$", rotated)
 
 
 def test_key_file_created_once_and_reused(tmp_path):

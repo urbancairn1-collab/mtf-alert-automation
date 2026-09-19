@@ -94,7 +94,7 @@ def get_webhook_secret(s: Session, box: SecretBox) -> str:
 
 
 def rotate_webhook_secret(s: Session, box: SecretBox) -> str:
-    secret = f"mtf_{secrets.token_hex(8)}"
+    secret = f"mtf_{secrets.token_hex(16)}"
     _settings_row(s).webhook_secret_enc = box.encrypt(secret)
     s.flush()
     return secret
