@@ -10,9 +10,10 @@ const RANGES = {
   buy_fill_timeout_sec: [5, 300, 'Buy fill timeout must be 5 to 300 seconds'],
   sell_reprice_attempts: [0, 10, 'Re-price attempts must be 0 to 10'],
   sell_reprice_interval_sec: [5, 120, 'Re-price interval must be 5 to 120 seconds'],
+  stale_alert_sec: [10, 3600, 'Stale-alert limit must be 10 to 3600 seconds'],
   paper_margin_pct: [10, 100, 'Paper margin must be 10% to 100%'],
 };
-const INTEGER_FIELDS = new Set(['amount_per_trade', 'capital_cap', 'max_open_positions', 'duplicate_window_sec', 'buy_fill_timeout_sec', 'sell_reprice_attempts', 'sell_reprice_interval_sec']);
+const INTEGER_FIELDS = new Set(['amount_per_trade', 'capital_cap', 'max_open_positions', 'duplicate_window_sec', 'buy_fill_timeout_sec', 'sell_reprice_attempts', 'sell_reprice_interval_sec', 'stale_alert_sec']);
 
 export function validateSettings(input) {
   const errors = {};
