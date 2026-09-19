@@ -1,0 +1,99 @@
+/* Design tokens. Light = "MTF Trader" reference, dark = Urban Cairn dark reference.
+   Radius rule: cards 12px, controls 8px, pills full. One accent (emerald) everywhere. */
+
+@font-face {
+  font-family: "Geist";
+  src: url("../fonts/geist-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../fonts/geist-mono-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: "Geist", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  --bg: #f3f6f4;
+  --surface: #ffffff;
+  --surface-2: #f7faf8;
+  --surface-3: #eef3f0;
+  --border: #e1e8e3;
+  --border-strong: #cfd9d3;
+  --text: #15201a;
+  --text-2: #4f5f56;
+  --text-3: #7a8a81;
+
+  --accent: #138a47;
+  --accent-hover: #0f773c;
+  --accent-soft: #e5f4eb;
+  --accent-ink: #ffffff;
+
+  --up: #12824a;
+  --up-soft: #e3f3e9;
+  --down: #c93b3b;
+  --down-soft: #fbeaea;
+  --warn: #9a6408;
+  --warn-soft: #fbf1dc;
+  --info: #2a62c9;
+  --info-soft: #e7eefc;
+
+  --focus: 0 0 0 3px rgba(19, 138, 71, 0.28);
+  --shadow-1: 0 1px 2px rgba(22, 60, 38, 0.06);
+  --shadow-2: 0 1px 2px rgba(22, 60, 38, 0.05), 0 6px 20px rgba(22, 60, 38, 0.06);
+  --shadow-3: 0 12px 40px rgba(16, 44, 28, 0.18);
+
+  --r-card: 12px;
+  --r-ctl: 8px;
+  --r-pill: 999px;
+
+  --sidebar-w: 236px;
+  --topbar-h: 64px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur: 180ms;
+
+  --z-sticky: 10;
+  --z-sidebar: 20;
+  --z-drawer: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b1210;
+  --surface: #111a17;
+  --surface-2: #15201c;
+  --surface-3: #1b2823;
+  --border: #22322c;
+  --border-strong: #2e433b;
+  --text: #e4ede8;
+  --text-2: #a4b4ab;
+  --text-3: #6f8178;
+
+  --accent: #2bb567;
+  --accent-hover: #34c572;
+  --accent-soft: rgba(43, 181, 103, 0.14);
+  --accent-ink: #06130c;
+
+  --up: #3ccf7c;
+  --up-soft: rgba(60, 207, 124, 0.13);
+  --down: #f07272;
+  --down-soft: rgba(240, 114, 114, 0.13);
+  --warn: #e7b54f;
+  --warn-soft: rgba(231, 181, 79, 0.13);
+  --info: #6f9ef2;
+  --info-soft: rgba(111, 158, 242, 0.14);
+
+  --focus: 0 0 0 3px rgba(43, 181, 103, 0.35);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, 0.28), 0 8px 24px rgba(0, 0, 0, 0.22);
+  --shadow-3: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}

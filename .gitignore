@@ -1,0 +1,27 @@
+# Runtime data: database, encryption key, scrip-master cache, logs. Never commit.
+data/
+*.db
+*.db-wal
+*.db-shm
+secret.key
+.env
+.env.*
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Test artifacts
+test-results/
+playwright-report/
+tests/e2e/shots/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
