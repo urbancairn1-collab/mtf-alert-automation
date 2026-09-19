@@ -69,3 +69,14 @@ def test_sell_while_exiting_ignored():
 
 def test_sell_with_open_position_passes():
     assert evaluate("SBIN", "SELL", ctx(positions=(OpenPos("SBIN", "OPEN", 9000.0),))).passed
+
+
+def test_sell_ignored_when_any_same_symbol_position_is_exiting():
+    v = evaluate("SBIN", "SELL", ctx(positions=(OpenPos("SBIN", "OPEN", 9000.0), OpenPos("SBIN", "EXITING", 9000.0))))
+    assert v.status == "IGNORED" and "already in progress" in v.reason
+    v = evaluate("SBIN", "SELL", ctx(positions=(OpenPos("SBIN", "EXITING", 9000.0), OpenPos("SBIN", "OPEN", 9000.0))))
+    assert v.status == "IGNORED" and "already in progress" in v.reason
+
+
+def test_sell_passes_with_two_open_same_symbol_positions():
+    assert evaluate("SBIN", "SELL", ctx(positions=(OpenPos("SBIN", "OPEN", 9000.0), OpenPos("SBIN", "OPEN", 4500.0)))).passed

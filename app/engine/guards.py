@@ -87,10 +87,10 @@ def _buy_rules(sym, act, c):
 
 
 def _sell_rules(sym, act, c):
-    pos = next((p for p in c.positions if p.symbol == sym), None)
-    if pos is None:
+    same_sym_positions = [p for p in c.positions if p.symbol == sym]
+    if not same_sym_positions:
         return "IGNORED", Check("Open position exists", False, f"No open MTF position in {sym}. Nothing to square off.")
-    if pos.status == "EXITING":
+    if any(p.status == "EXITING" for p in same_sym_positions):
         return "IGNORED", Check("Exit not already working", False, f"Exit for {sym} already in progress.")
     return None, Check("Open position exists", True, f"{sym} held, squaring off in full")
 
