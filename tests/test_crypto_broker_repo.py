@@ -48,3 +48,16 @@ def test_webhook_secret_created_once_then_rotated(session, box):
     first = get_webhook_secret(session, box)
     assert first == get_webhook_secret(session, box)
     assert rotate_webhook_secret(session, box) != first
+
+
+def test_key_file_created_once_and_reused(tmp_path):
+    key_path = tmp_path / "sub" / "k"
+    box1 = SecretBox(key_path)
+    assert key_path.exists()
+    key_bytes = key_path.read_bytes()
+
+    box2 = SecretBox(key_path)
+    assert key_path.read_bytes() == key_bytes
+
+    token = box1.encrypt("secret")
+    assert box2.decrypt(token) == "secret"
