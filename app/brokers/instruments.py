@@ -2,7 +2,7 @@
 import json
 import logging
 from collections.abc import Callable
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from pathlib import Path
 
 import httpx
@@ -28,6 +28,7 @@ def _download(url: str) -> list[dict]:
 class InstrumentMaster:
     def __init__(self, rows: list[dict]):
         self._index: dict[tuple[str, str], Instrument] = {}
+        skipped = 0
         for r in rows:
             exch = r.get("exch_seg")
             if exch not in ("NSE", "BSE") or r.get("instrumenttype"):
@@ -35,19 +36,52 @@ class InstrumentMaster:
             sym = str(r.get("symbol", ""))
             if exch == "NSE" and not sym.endswith("-EQ"):
                 continue
+
+            # Validate token is present and non-empty
+            token = r.get("token", "").strip()
+            if not token:
+                skipped += 1
+                continue
+
+            # Validate tick_size if present is numeric
+            tick_size_str = r.get("tick_size")
+            if tick_size_str:
+                try:
+                    tick = float(tick_size_str) / 100
+                except (ValueError, TypeError):
+                    skipped += 1
+                    continue
+            else:
+                tick = 5 / 100
+
             key = sym.removesuffix("-EQ").upper() if exch == "NSE" else sym.upper()
-            tick = float(r.get("tick_size") or 5) / 100
-            self._index[(exch, key)] = Instrument(key, exch, str(r["token"]), sym, tick)
+            self._index[(exch, key)] = Instrument(key, exch, token, sym, tick)
+
+        if skipped > 0:
+            log.warning("scrip master: skipped %d malformed rows", skipped)
 
     @classmethod
     def load(cls, cache_path: Path, url: str, now: datetime,
              fetch: Callable[[str], list[dict]] = _download) -> "InstrumentMaster":
-        today_cutoff = datetime.combine(now.astimezone(IST).date(), REFRESH_AFTER, IST)
-        fresh = cache_path.exists() and (
-            datetime.fromtimestamp(cache_path.stat().st_mtime, IST) >= today_cutoff or now < today_cutoff
-        )
-        if fresh:
-            return cls(json.loads(cache_path.read_text(encoding="utf-8")))
+        now_ist = now.astimezone(IST)
+        today_cutoff = datetime.combine(now_ist.date(), REFRESH_AFTER, IST)
+        # Compute last_cutoff: today's 08:30 IST if now >= today's 08:30, else yesterday's 08:30 IST
+        if now_ist >= today_cutoff:
+            last_cutoff = today_cutoff
+        else:
+            last_cutoff = today_cutoff - timedelta(days=1)
+
+        # Try to use cache if it exists and is fresh
+        if cache_path.exists():
+            cache_mtime_ist = datetime.fromtimestamp(cache_path.stat().st_mtime, IST)
+            if cache_mtime_ist >= last_cutoff:
+                try:
+                    rows = json.loads(cache_path.read_text(encoding="utf-8"))
+                    return cls(rows)
+                except (ValueError, OSError) as e:
+                    log.warning("scrip master cache corrupted: %s", e)
+
+        # Cache is stale or corrupted; fetch fresh copy
         rows = fetch(url)
         cache_path.parent.mkdir(parents=True, exist_ok=True)
         cache_path.write_text(json.dumps(rows), encoding="utf-8")

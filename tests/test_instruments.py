@@ -63,3 +63,52 @@ def test_cache_refreshed_after_0830_when_old(tmp_path):
     m = InstrumentMaster.load(cache, "http://x", now, fetch=lambda url: ROWS)
     assert m.resolve("SBIN", "NSE").token == "3045"
     assert json.loads(cache.read_text())[0]["token"] == "3045"
+
+
+def test_corrupt_cache_triggers_download(tmp_path):
+    cache = tmp_path / "sm.json"
+    cache.write_text("{not json")
+    calls = []
+    now = datetime(2026, 9, 18, 10, 0, tzinfo=IST)
+    import os
+    os.utime(cache, (now.timestamp(), now.timestamp()))
+    m = InstrumentMaster.load(cache, "http://x", now, fetch=lambda url: calls.append(url) or ROWS)
+    assert calls == ["http://x"]
+    assert m.resolve("SBIN", "NSE").token == "3045"
+
+
+def test_malformed_rows_are_skipped():
+    bad_rows = ROWS + [
+        {"symbol": "BAD-EQ", "exch_seg": "NSE", "instrumenttype": "", "tick_size": "5"},
+        {"token": "7", "symbol": "ODD-EQ", "exch_seg": "NSE", "instrumenttype": "", "tick_size": "abc"}
+    ]
+    m = InstrumentMaster(bad_rows)
+    assert m.resolve("SBIN", "NSE").token == "3045"
+    with pytest.raises(UnknownSymbol):
+        m.resolve("BAD", "NSE")
+    with pytest.raises(UnknownSymbol):
+        m.resolve("ODD", "NSE")
+
+
+def test_old_cache_before_0830_is_refreshed(tmp_path):
+    cache = tmp_path / "sm.json"
+    cache.write_text("[]")
+    old = datetime(2026, 9, 14, 18, 0, tzinfo=IST).timestamp()
+    import os
+    os.utime(cache, (old, old))
+    calls = []
+    now = datetime(2026, 9, 18, 7, 0, tzinfo=IST)
+    InstrumentMaster.load(cache, "http://x", now, fetch=lambda url: calls.append(url) or ROWS)
+    assert calls == ["http://x"]
+
+
+def test_yesterday_evening_cache_is_fresh_before_0830(tmp_path):
+    cache = tmp_path / "sm.json"
+    cache.write_text(json.dumps(ROWS))
+    old = datetime(2026, 9, 17, 18, 0, tzinfo=IST).timestamp()
+    import os
+    os.utime(cache, (old, old))
+    calls = []
+    now = datetime(2026, 9, 18, 7, 0, tzinfo=IST)
+    InstrumentMaster.load(cache, "http://x", now, fetch=lambda url: calls.append(url) or ROWS)
+    assert calls == []
