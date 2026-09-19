@@ -33,6 +33,8 @@ class SizeResult:
 
 def size_order(mode: Literal["margin", "value"], amount: float, limit: float,
                margin_per_share: float, available: float | None) -> SizeResult:
+    if margin_per_share <= 0 or limit <= 0:
+        return SizeResult(0, 0.0, margin_per_share, f"Cannot size order: margin per share {inr(margin_per_share)} and limit {inr(limit)} must be positive")
     if mode == "margin":
         qty = math.floor(amount / margin_per_share + EPS)
         note = f"{inr(amount, 0)} / {inr(margin_per_share)} MTF margin per share = {qty}"

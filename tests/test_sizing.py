@@ -55,3 +55,15 @@ def test_available_funds_reduce_qty_and_say_so():
 
 def test_amount_too_small_gives_zero_qty():
     assert size_order("value", 500, 3612.0, 900.0, available=None).qty == 0
+
+
+def test_zero_margin_gives_zero_qty_not_crash():
+    r = size_order("margin", 10000, 800.0, 0.0, available=None)
+    assert r.qty == 0
+    assert r.deployed == 0.0
+    assert "Cannot size order" in r.note
+
+
+def test_zero_limit_gives_zero_qty_not_crash():
+    r = size_order("value", 10000, 0.0, 200.0, available=None)
+    assert r.qty == 0
